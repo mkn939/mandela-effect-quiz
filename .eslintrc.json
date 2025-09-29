@@ -1,0 +1,24 @@
+{
+  "env": { 
+    "browser": true, 
+    "es2020": true 
+  },
+  "extends": [
+    "eslint:recommended"
+  ],
+  "ignorePatterns": [
+    "dist", 
+    ".eslintrc.json",
+    "node_modules",
+    "*.config.js",
+    "*.config.ts"
+  ],
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+  },
+  "rules": {
+    "no-unused-vars": "warn",
+    "no-console": "warn"
+  }
+}
