@@ -13,7 +13,7 @@ const App: React.FC = () => {
     getCurrentQuestion,
     getProgress,
     isCurrentQuestionAnswered,
-    DIVERGENCE_COMMENTS
+    // 移除不需要的常數引用
   } = useQuiz();
 
   const handleAnswer = (optionId: string) => {

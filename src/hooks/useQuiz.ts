@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { Question, UserAnswer, TestResult, QuizState, DivergenceComment } from '../types';
 import { MANDELA_QUESTIONS, shuffleQuestions, shuffleOptions } from '../data/questions';
-import { getDivergenceComment, DIVERGENCE_COMMENTS } from '../data/divergence-comments';
+import { getDivergenceComment } from '../data/divergence-comments';
 
 /**
  * 測驗狀態管理 Hook
@@ -95,7 +95,6 @@ export const useQuiz = () => {
 
     // 計算正確答案數和乖離率評論
     const correctAnswers = answers.filter(answer => answer.isCorrect).length;
-    const wrongAnswers = answers.filter(answer => !answer.isCorrect).length;
     const divergenceComment: DivergenceComment = getDivergenceComment(correctAnswers, quizState.questions.length);
 
     const testResult: TestResult = {
@@ -178,7 +177,6 @@ export const useQuiz = () => {
     getProgress,
     isCurrentQuestionAnswered,
     
-    // 常數
-    DIVERGENCE_COMMENTS
+    // 常數 - 已移除，不再需要
   };
 };

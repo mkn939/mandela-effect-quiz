@@ -1,5 +1,5 @@
 import React from 'react';
-import { TestResult, DivergenceComment } from '../types';
+import { TestResult } from '../types';
 import { DIVERGENCE_COMMENTS } from '../data/divergence-comments';
 
 interface ResultDisplayProps {

@@ -13,7 +13,6 @@ export const calculateTestResult = (
 ): TestResult => {
   const totalQuestions = questions.length;
   const correctAnswers = answers.filter(answer => answer.isCorrect).length;
-  const wrongAnswers = totalQuestions - correctAnswers;
   const score = calculateScorePercentage(correctAnswers, totalQuestions);
   const divergenceComment: DivergenceComment = getDivergenceComment(correctAnswers, totalQuestions);
   const totalTimeSpent = Math.round((endTime.getTime() - startTime.getTime()) / 1000);

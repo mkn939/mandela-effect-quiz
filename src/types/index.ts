@@ -59,6 +59,23 @@ export interface DivergenceComment {
 }
 
 /**
+ * 結果分類型別 (保留向後兼容性)
+ */
+export type ResultCategory = 'M1' | 'M2' | 'M3' | 'M4' | 'M5';
+
+/**
+ * 結果分類資訊介面 (保留向後兼容性)
+ */
+export interface ResultCategoryInfo {
+  id: ResultCategory;
+  title: string;
+  description: string;
+  scoreRange: { min: number; max: number };
+  color: string;
+  icon: string;
+}
+
+/**
  * 測驗狀態
  */
 export interface QuizState {
