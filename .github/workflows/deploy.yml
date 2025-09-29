@@ -40,6 +40,10 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          # 設定為根路徑，適用於 custom domain
+          # 如果你只使用 GitHub Pages 子路徑，可以移除這行
+          VITE_BASE_PATH: '/'
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
