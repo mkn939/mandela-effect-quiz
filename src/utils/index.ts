@@ -12,15 +12,17 @@ export const calculateTestResult = (
   endTime: Date
 ): TestResult => {
   const totalQuestions = questions.length;
+  const answeredQuestions = answers.filter(answer => !answer.isUnknown).length;
   const correctAnswers = answers.filter(answer => answer.isCorrect).length;
   const score = calculateScorePercentage(correctAnswers, totalQuestions);
-  const divergenceComment: DivergenceComment = getDivergenceComment(correctAnswers, totalQuestions);
+  const divergenceComment: DivergenceComment = getDivergenceComment(correctAnswers, answeredQuestions);
   const totalTimeSpent = Math.round((endTime.getTime() - startTime.getTime()) / 1000);
 
   return {
     answers,
     score,
     totalQuestions,
+    answeredQuestions,
     correctAnswers,
     divergenceRate: divergenceComment.rate,
     divergenceComment: divergenceComment.comment,
@@ -129,7 +131,7 @@ export const storage = {
   /**
    * 保存測驗配置
    */
-  saveConfig: (config: any): void => {
+  saveConfig: (config: Record<string, unknown>): void => {
     try {
       localStorage.setItem('mandela-quiz-config', JSON.stringify(config));
     } catch (error) {
@@ -140,7 +142,7 @@ export const storage = {
   /**
    * 獲取測驗配置
    */
-  getConfig: (): any => {
+  getConfig: (): Record<string, unknown> | null => {
     try {
       const config = localStorage.getItem('mandela-quiz-config');
       return config ? JSON.parse(config) : null;

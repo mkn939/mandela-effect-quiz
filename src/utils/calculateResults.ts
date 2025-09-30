@@ -69,7 +69,7 @@ const generateDivergenceComment = (divergenceRate: number, unknownCount: number 
  * 生成全選「不知道」時的特殊評論
  */
 const generateUnknownComment = (unknownCount: number, totalQuestions: number): string => {
-  return `謎之觀測者！你對所有${totalQuestions}個曼德拉效應都保持了謙虛的態度。雖然時空線乖離率無法測定，但這種誠實面對未知的精神，連岡倫都會為之動容。或許你就是傳說中能夠跨越多元宇宙的「中立觀測者」！`;
+  return `謎之觀測者！你對所有${totalQuestions}個曼德拉效應都保持了謙虛的態度。雖然時空線乖離率無法測定，但這種誠實面對未知的精神，連岡倫都會為之動容。或許你就是傳說中能夠跨越多元宇宙的「中立觀測者」！共${unknownCount}題保持謙虛態度。`;
 };
 
 /**
