@@ -21,6 +21,7 @@ export interface Option {
   text?: string;
   image?: string;
   isCorrect: boolean;
+  isUnknown?: boolean; // 標記為「不知道」選項
 }
 
 /**
@@ -30,6 +31,7 @@ export interface UserAnswer {
   questionId: string;
   selectedOptionId: string;
   isCorrect: boolean;
+  isUnknown?: boolean; // 是否選擇「不知道」
   timeSpent?: number; // 答題時間（秒）
 }
 
@@ -40,6 +42,7 @@ export interface TestResult {
   answers: UserAnswer[];
   score: number;
   totalQuestions: number;
+  answeredQuestions: number; // 實際回答的問題數（排除「不知道」）
   correctAnswers: number;
   divergenceRate: number; // 時空線乖離率 (0-100%)
   divergenceComment: string; // 中二風格評論

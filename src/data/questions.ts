@@ -17,6 +17,12 @@ export const MANDELA_QUESTIONS: Question[] = [
         id: 'q1-b',
         text: '黃色尾巴後面有黑色條紋',
         isCorrect: false
+      },
+      {
+        id: 'q1-unknown',
+        text: '不知道',
+        isCorrect: false,
+        isUnknown: true
       }
     ],
     correctAnswer: 'q1-a',
@@ -37,6 +43,12 @@ export const MANDELA_QUESTIONS: Question[] = [
         id: 'q2-b',
         text: '不是吊帶褲',
         isCorrect: true
+      },
+      {
+        id: 'q2-unknown',
+        text: '不知道',
+        isCorrect: false,
+        isUnknown: true
       }
     ],
     correctAnswer: 'q2-b',
@@ -57,6 +69,12 @@ export const MANDELA_QUESTIONS: Question[] = [
         id: 'q3-b',
         text: 'No, I am your father',
         isCorrect: true
+      },
+      {
+        id: 'q3-unknown',
+        text: '不知道',
+        isCorrect: false,
+        isUnknown: true
       }
     ],
     correctAnswer: 'q3-b',
@@ -77,6 +95,12 @@ export const MANDELA_QUESTIONS: Question[] = [
         id: 'q4-b',
         text: 'Magic mirror on the wall',
         isCorrect: true
+      },
+      {
+        id: 'q4-unknown',
+        text: '不知道',
+        isCorrect: false,
+        isUnknown: true
       }
     ],
     correctAnswer: 'q4-b',
@@ -97,6 +121,12 @@ export const MANDELA_QUESTIONS: Question[] = [
         id: 'q5-b',
         text: '沒有箭頭',
         isCorrect: false
+      },
+      {
+        id: 'q5-unknown',
+        text: '不知道',
+        isCorrect: false,
+        isUnknown: true
       }
     ],
     correctAnswer: 'q5-a',
@@ -117,6 +147,12 @@ export const MANDELA_QUESTIONS: Question[] = [
         id: 'q6-b',
         text: '中國人不是病夫',
         isCorrect: true
+      },
+      {
+        id: 'q6-unknown',
+        text: '不知道',
+        isCorrect: false,
+        isUnknown: true
       }
     ],
     correctAnswer: 'q6-b',
@@ -137,6 +173,12 @@ export const MANDELA_QUESTIONS: Question[] = [
         id: 'q7-b',
         text: '有一隻銀腿',
         isCorrect: true
+      },
+      {
+        id: 'q7-unknown',
+        text: '不知道',
+        isCorrect: false,
+        isUnknown: true
       }
     ],
     correctAnswer: 'q7-b',
@@ -157,6 +199,12 @@ export const MANDELA_QUESTIONS: Question[] = [
         id: 'q8-b',
         text: '沒有戴單邊眼鏡',
         isCorrect: true
+      },
+      {
+        id: 'q8-unknown',
+        text: '不知道',
+        isCorrect: false,
+        isUnknown: true
       }
     ],
     correctAnswer: 'q8-b',
@@ -177,6 +225,12 @@ export const MANDELA_QUESTIONS: Question[] = [
         id: 'q9-b',
         text: 'Adidas',
         isCorrect: true
+      },
+      {
+        id: 'q9-unknown',
+        text: '不知道',
+        isCorrect: false,
+        isUnknown: true
       }
     ],
     correctAnswer: 'q9-b',
@@ -191,12 +245,18 @@ export const MANDELA_QUESTIONS: Question[] = [
       {
         id: 'q10-a',
         text: '天將降大任于是人也',
-        isCorrect: true
+        isCorrect: false
       },
       {
         id: 'q10-b',
         text: '天將降大任于斯人也',
-        isCorrect: false
+        isCorrect: true
+      },
+      {
+        id: 'q10-unknown',
+        text: '不知道',
+        isCorrect: false,
+        isUnknown: true
       }
     ],
     correctAnswer: 'q10-b',
@@ -219,14 +279,25 @@ export const shuffleQuestions = (questions: Question[]): Question[] => {
 };
 
 /**
- * 隨機打亂問題選項
+ * 隨機打亂問題選項（「不知道」選項固定在最後）
  */
 export const shuffleOptions = (question: Question): Question => {
-  const shuffledOptions = [...question.options];
-  for (let i = shuffledOptions.length - 1; i > 0; i--) {
+  // 分離「不知道」選項和其他選項
+  const unknownOption = question.options.find(opt => opt.isUnknown);
+  const normalOptions = question.options.filter(opt => !opt.isUnknown);
+
+  // 只打亂非「不知道」的選項
+  const shuffledNormalOptions = [...normalOptions];
+  for (let i = shuffledNormalOptions.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [shuffledOptions[i], shuffledOptions[j]] = [shuffledOptions[j], shuffledOptions[i]];
+    [shuffledNormalOptions[i], shuffledNormalOptions[j]] = [shuffledNormalOptions[j], shuffledNormalOptions[i]];
   }
+
+  // 將「不知道」選項放在最後
+  const shuffledOptions = unknownOption
+    ? [...shuffledNormalOptions, unknownOption]
+    : shuffledNormalOptions;
+
   return {
     ...question,
     options: shuffledOptions

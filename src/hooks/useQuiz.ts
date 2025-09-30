@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { Question, UserAnswer, TestResult, QuizState, DivergenceComment } from '../types';
 import { MANDELA_QUESTIONS, shuffleQuestions, shuffleOptions } from '../data/questions';
-import { getDivergenceComment } from '../data/divergence-comments';
+import { getDivergenceComment, DIVERGENCE_COMMENTS } from '../data/divergence-comments';
 
 /**
  * 測驗狀態管理 Hook
@@ -46,75 +46,91 @@ export const useQuiz = () => {
    * 回答問題
    */
   const answerQuestion = useCallback((selectedOptionId: string) => {
-    const currentQuestion = quizState.questions[quizState.currentQuestionIndex];
-    if (!currentQuestion) return;
+    setQuizState(prev => {
+      const currentQuestion = prev.questions[prev.currentQuestionIndex];
+      if (!currentQuestion) return prev;
 
-    const selectedOption = currentQuestion.options.find(opt => opt.id === selectedOptionId);
-    if (!selectedOption) return;
+      const selectedOption = currentQuestion.options.find(opt => opt.id === selectedOptionId);
+      if (!selectedOption) return prev;
 
-    const newAnswer: UserAnswer = {
-      questionId: currentQuestion.id,
-      selectedOptionId,
-      isCorrect: selectedOption.isCorrect,
-      timeSpent: 0 // 可以後續加入計時功能
-    };
+      const newAnswer: UserAnswer = {
+        questionId: currentQuestion.id,
+        selectedOptionId,
+        isCorrect: selectedOption.isCorrect,
+        isUnknown: selectedOption.isUnknown,
+        timeSpent: 0
+      };
 
-    const newAnswers = [...quizState.answers, newAnswer];
+      const newAnswers = [...prev.answers, newAnswer];
 
-    setQuizState(prev => ({
-      ...prev,
-      answers: newAnswers
-    }));
+      // 最後一題不立即完成測驗，讓用戶看到答案和解釋
 
-    // 如果是最後一題，完成測驗
-    if (quizState.currentQuestionIndex === quizState.questions.length - 1) {
-      completeQuiz(newAnswers);
-    }
-  }, [quizState]);
+      return {
+        ...prev,
+        answers: newAnswers
+      };
+    });
+  }, []);
 
   /**
-   * 下一題
+   * 下一題或完成測驗
    */
   const nextQuestion = useCallback(() => {
-    if (quizState.currentQuestionIndex < quizState.questions.length - 1) {
-      setQuizState(prev => ({
-        ...prev,
-        currentQuestionIndex: prev.currentQuestionIndex + 1
-      }));
-    }
-  }, [quizState.currentQuestionIndex, quizState.questions.length]);
+    setQuizState(prev => {
+      // 如果當前是最後一題，完成測驗
+      if (prev.currentQuestionIndex === prev.questions.length - 1) {
+        const endTime = new Date();
+        const totalTimeSpent = prev.startTime
+          ? Math.floor((endTime.getTime() - prev.startTime.getTime()) / 1000)
+          : 0;
 
-  /**
-   * 完成測驗
-   */
-  const completeQuiz = useCallback((answers: UserAnswer[]) => {
-    const endTime = new Date();
-    const totalTimeSpent = quizState.startTime 
-      ? Math.floor((endTime.getTime() - quizState.startTime.getTime()) / 1000)
-      : 0;
+        // 排除「不知道」的答案，只計算實際回答的題目
+        const answeredQuestions = prev.answers.filter(answer => !answer.isUnknown);
+        const correctAnswers = answeredQuestions.filter(answer => answer.isCorrect).length;
+        const answeredCount = answeredQuestions.length;
 
-    // 計算正確答案數和乖離率評論
-    const correctAnswers = answers.filter(answer => answer.isCorrect).length;
-    const divergenceComment: DivergenceComment = getDivergenceComment(correctAnswers, quizState.questions.length);
+        // 處理全選「不知道」的特殊情況
+        let divergenceComment: DivergenceComment;
+        if (answeredCount === 0) {
+          // 全選「不知道」，使用特殊評論
+          divergenceComment = DIVERGENCE_COMMENTS.find(c => c.rate === -1) || DIVERGENCE_COMMENTS[0];
+        } else {
+          // 正常情況 - 根據實際回答的題目計算乖離率
+          divergenceComment = getDivergenceComment(correctAnswers, answeredCount);
+        }
 
-    const testResult: TestResult = {
-      answers,
-      score: correctAnswers,
-      totalQuestions: quizState.questions.length,
-      correctAnswers,
-      divergenceRate: divergenceComment.rate,
-      divergenceComment: divergenceComment.comment,
-      completedAt: endTime,
-      totalTimeSpent
-    };
+        const testResult: TestResult = {
+          answers: prev.answers,
+          score: correctAnswers,
+          totalQuestions: prev.questions.length,
+          answeredQuestions: answeredCount,
+          correctAnswers,
+          divergenceRate: divergenceComment.rate,
+          divergenceComment: divergenceComment.comment,
+          completedAt: endTime,
+          totalTimeSpent
+        };
 
-    setResult(testResult);
-    setQuizState(prev => ({
-      ...prev,
-      isCompleted: true,
-      endTime
-    }));
-  }, [quizState.startTime, quizState.questions.length]);
+        setResult(testResult);
+
+        return {
+          ...prev,
+          isCompleted: true,
+          endTime
+        };
+      }
+      
+      // 否則進入下一題
+      if (prev.currentQuestionIndex < prev.questions.length - 1) {
+        return {
+          ...prev,
+          currentQuestionIndex: prev.currentQuestionIndex + 1
+        };
+      }
+      
+      return prev;
+    });
+  }, []);
 
   /**
    * 重置測驗

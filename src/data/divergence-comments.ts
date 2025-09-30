@@ -6,6 +6,13 @@ import { DivergenceComment } from '../types';
  */
 export const DIVERGENCE_COMMENTS: DivergenceComment[] = [
   {
+    rate: -1, // 特殊值，用於全選「不知道」的情況
+    title: '？時空線 - 謎之觀測者',
+    comment: '不可思議！你對所有曼德拉效應都保持了謙虛的「不知道」態度。這種跨越認知邊界的行為，連β世界線的牧瀨紅莉栖都無法解釋。你或許就是傳說中能夠同時觀測多元宇宙的「中立觀測者」！El. Psy. Kongroo.',
+    worldLine: '？ ???.??????%',
+    color: '#9370DB'
+  },
+  {
     rate: 0,
     title: 'α時空線 - 原始記憶守護者',
     comment: '恭喜！你的記憶與現實完全同步，彷彿擁有Reading Steiner的能力。你是這個時空線的真正守護者，沒有任何曼德拉效應能夠撼動你堅實的認知基礎。El. Psy. Kongroo.',
@@ -86,23 +93,33 @@ export const DIVERGENCE_COMMENTS: DivergenceComment[] = [
 
 /**
  * 根據正確答案數計算乖離率並獲取對應評論
- * @param correctAnswers 正確答案數 (0-10)
- * @param totalQuestions 總題數
+ * @param correctAnswers 正確答案數
+ * @param answeredQuestions 實際回答的題數（排除「不知道」選項）
  * @returns 乖離率評論對象
  */
-export const getDivergenceComment = (correctAnswers: number, totalQuestions: number): DivergenceComment => {
+export const getDivergenceComment = (correctAnswers: number, answeredQuestions: number): DivergenceComment => {
   // 計算乖離率：錯誤率 × 100%
-  const wrongAnswers = totalQuestions - correctAnswers;
-  const divergenceRate = Math.round((wrongAnswers / totalQuestions) * 100);
+  const wrongAnswers = answeredQuestions - correctAnswers;
+  const divergenceRate = answeredQuestions > 0 ? Math.round((wrongAnswers / answeredQuestions) * 100) : 0;
 
-  // 找到對應的評論
-  const comment = DIVERGENCE_COMMENTS.find(c => c.rate === divergenceRate);
-
-  if (!comment) {
-    throw new Error(`未找到乖離率 ${divergenceRate}% 的對應評論`);
+  // 找到最接近的乖離率評論
+  let closestComment = DIVERGENCE_COMMENTS.find(c => c.rate >= 0 && c.rate === divergenceRate);
+  
+  // 如果找不到精確匹配，找最接近的評論
+  if (!closestComment) {
+    closestComment = DIVERGENCE_COMMENTS
+      .filter(c => c.rate >= 0)
+      .reduce((prev, curr) => 
+        Math.abs(curr.rate - divergenceRate) < Math.abs(prev.rate - divergenceRate) ? curr : prev
+      );
   }
 
-  return comment;
+  if (!closestComment) {
+    // 最終備案
+    closestComment = DIVERGENCE_COMMENTS.find(c => c.rate === 0) || DIVERGENCE_COMMENTS[1];
+  }
+
+  return closestComment;
 };
 
 /**
